@@ -115,14 +115,32 @@ def CreateTeams(playersFile, teamSize):
 
         # print(f'players leftover: {playerValues}')
 
-        t = 0
-        while t < len(teams):
-            # printing with commas so it's easier to paste into a spreadsheet
-            print(f'TEAM {t},\t{sums[t]:.2f}')
-            for p in teams[t]:
-                print(f'\t,{p[0]},\t{p[1]}')
-            t += 1
+        # write teams to teams.csv file (and also print to console)
+        with open('teams.csv', 'w', newline='') as csvOut:
+            fieldnames = ['TEAM', 'PLAYER', 'VALUE']
+            csv_writer = csv.DictWriter(csvOut, fieldnames=fieldnames)
+            csv_writer.writeheader()
+                
+            t = 0
+            while t < len(teams):
+                # printing with commas so it's easier to paste into a spreadsheet
+                print(f'TEAM {t+1},\t{sums[t]:.2f}')
+                teamName = "TEAM {0}".format(t+1)
+                teamValue = str('{:.2f}').format(sums[t])
+                csv_writer.writerow({'TEAM': teamName, 'PLAYER': '', 'VALUE': teamValue})
+                for p in teams[t]:
+                    print(f'\t,{p[0]},\t{p[1]:.1f}')
+                    playerName = p[0]
+                    playerValue = str('{:.1f}').format(p[1])
+                    csv_writer.writerow({'TEAM': '', 'PLAYER': playerName, 'VALUE': playerValue})
+                t += 1
+            
+            csv_writer.writerow({ 'TEAM': 'STATS', 'PLAYER': '', 'VALUE': '' })
+            csv_writer.writerow({ 'TEAM': '', 'PLAYER': 'Average', 'VALUE': statistics.mean(sums) })
+            csv_writer.writerow({ 'TEAM': '', 'PLAYER': 'Median', 'VALUE': statistics.median(sums) })
+            csv_writer.writerow({ 'TEAM': '', 'PLAYER': 'Std Dev', 'VALUE': statistics.pstdev(sums) })
 
+        print('---------------------- Team Stats ----------------------')
         print(f'Average:\t{statistics.mean(sums)}')
         print(f'Median :\t{statistics.median(sums)}')
         print(f'Std Dev:\t{statistics.pstdev(sums)}')
@@ -148,3 +166,5 @@ if __name__ == '__main__':
     
     # Calling the function 
     CreateTeams(players, teamSize)
+
+    print("Done.")

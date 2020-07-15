@@ -2,6 +2,10 @@
 
 Takes a CSV of players (player,value) with header row, and groups those players into even teams using a best-first bin-packing heuristic.
 
+### Output
+
+Prints the teams to console, and writes to `teams.csv` file.
+
 ## Requirements
 
 - **Python 3.8** (can use lower Python 3.x if you don't want to see all of the printed information from the statistics package)
