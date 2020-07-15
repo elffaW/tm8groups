@@ -6,6 +6,17 @@ import statistics
 BOT_VALUE = 3
 
 def findBest(items, bins, maxBinSize):
+    """find the index of the "best bin" (the one with lowest value that still has room for more items)
+
+        Arguments:
+            items {list} of values
+            bins {list} of bins with items in them
+            maxBinSize {int} max number of items in a bin
+
+        Returns:
+            {int} - index into the items (and bins) array with the lowest value that has room for another item
+    """
+
     if len(items) < 2:
         return 0
     
@@ -23,10 +34,17 @@ def findBest(items, bins, maxBinSize):
     return minIdx
 
 
-# Function to extract frames 
-# @param playersFile csv file of all players in player,value format
-# @param teamSize int number of players per team
 def CreateTeams(playersFile, teamSize):
+    """Reads players from the file and creates teams using a Best First bin-packing heuristic
+        
+        Arguments:
+            -playersFile {string} csv file path of all players in player,value format
+            teamSize {int} number of players per team
+        
+        Returns:
+            N/A
+    """
+
     print("Creating teams from the following parameters")
     print("players file: {0}, team size: {1}, bot value: {2}".format(playersFile, teamSize, BOT_VALUE))
     
@@ -39,9 +57,7 @@ def CreateTeams(playersFile, teamSize):
             if curLine == 0:
                 name = list(row.keys())[0]
                 value = list(row.keys())[1]
-                name = "Name"
-                value = "Value"
-                print(f'Column names are {", ".join(row)}')
+                # print(f'Column names are {", ".join(row)}')
                 curLine += 1
             # print(f'\t{row[name]}\t is worth ${row[value]}M')
             playerValues.setdefault(row[name], float(row[value]))
@@ -58,11 +74,12 @@ def CreateTeams(playersFile, teamSize):
             playerValues.setdefault(f'BOT{botNum}', BOT_VALUE)
             botNum += 1
             totalValue += BOT_VALUE
-        print(f'Player:Values {playerValues}')
+        # print(f'Player:Values {playerValues}')
 
         numTeams = int(len(playerValues) / teamSize)
         print(f'Num teams:\t{numTeams}\tNum players: {len(playerValues)}')
 
+        print('---------------------- Stats ----------------------')
         avg = statistics.mean(playerValues.values())
         stdDev = statistics.pstdev(playerValues.values())
         print(f'Average:\t{avg}')
@@ -70,9 +87,7 @@ def CreateTeams(playersFile, teamSize):
         print(f'Quantiles:\t{statistics.quantiles(playerValues.values(), n=teamSize)}')
         print(f'Std Dev:\t{stdDev}')
         print(f'Total Value:\t{totalValue}')
-
-        MAX_TEAM = (avg * 3) + (stdDev)
-        MIN_TEAM = (avg * 3) - (stdDev)
+        print('---------------------- ----- ----------------------')
 
         # initialize teams and their sums
         n = 0
@@ -81,32 +96,17 @@ def CreateTeams(playersFile, teamSize):
         while n < numTeams:
             teams.append([])
             sums.append(0)
-        #     i = 0
-        #     s = 0
-        #     tempValues = playerValues.copy()
-        #     while s < teamSize and len(tempValues) > 0:
-        #         p = list(tempValues)[0]
-        #         v = tempValues[p]
-        #         if sums[n] < MAX_TEAM and (sums[n] + v) < MAX_TEAM:
-        #             teams[n].append({p, v})
-        #             sums[n] += v
-        #             s += 1
-        #             playerValues.pop(p)
-
-        #         tempValues.pop(p)
-
-        #         if s == teamSize:
-        #             break
             n += 1
         r = 0
 
         sortedPlayers = {k: v for k, v in sorted(playerValues.items(), reverse=True, key=lambda item: item[1])}
 
+        # allocate players to teams with a best-first approach
         for p, v in sortedPlayers.items():
             tempValues = playerValues.copy()
             if len(tempValues) > 0:
                 minIdx = findBest(sums, teams, teamSize)
-                print(f'minIdx: {minIdx}\tcurPlayer: {(p, v)}')
+                # print(f'minIdx: {minIdx}\tcurPlayer: {(p, v)}')
                 if len(teams[minIdx]) < teamSize:
                     teams[minIdx].append((p, v))
                     sums[minIdx] += v
@@ -124,6 +124,7 @@ def CreateTeams(playersFile, teamSize):
             t += 1
 
         print(f'Average:\t{statistics.mean(sums)}')
+        print(f'Median :\t{statistics.median(sums)}')
         print(f'Std Dev:\t{statistics.pstdev(sums)}')
 
 
