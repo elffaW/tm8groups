@@ -26,9 +26,13 @@ def findBest(items, bins, maxBinSize):
     while i < len(items):
         item = items[i]
         bin = bins[i]
-        if item < minItem and len(bin) < maxBinSize:
-            minItem = item
-            minIdx = i
+        if len(bin) < maxBinSize:
+            if round(item, 1) == round(minItem, 1):
+                print(f'item: {round(item,1)}|{len(bin)}\tminItem: {round(minItem,1)}|{len(bins[minIdx])}')
+            
+            if round(item, 1) < round(minItem, 1) or (round(item, 1) == round(minItem, 1) and len(bin) > len(bins[minIdx])):
+                minItem = item
+                minIdx = i
         i += 1
     
     return minIdx
